@@ -1,12 +1,10 @@
 from flask import Flask
-from flask_restful import Api
-from app.controllers.reconciliation_controller import ReconciliationResource
+from app.controllers.reconciliation_controller import reconciliation_blueprint  # Assuming the controller is in a directory named "controllers"
 
 app = Flask(__name__)
-api = Api(app)
 
-api.add_resource(ReconciliationResource, '/v1/data-tool/reconciliation')
+# Register blueprints
+app.register_blueprint(reconciliation_blueprint)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8088)
-
+    app.run(debug=True, port=8088)  # You can specify the port you want to use here

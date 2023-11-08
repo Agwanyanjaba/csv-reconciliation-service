@@ -1,21 +1,25 @@
-from flask_restful import Resource, reqparse
-#from app.services.reconciliation_service import ReconciliationService
+from flask import Blueprint, request, jsonify
+from werkzeug.utils import secure_filename
+from app.services.reconciliation_service import ReconciliationService
 
-class ReconciliationResource(Resource):
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('sourceFile', type=str, location='files')
-        parser.add_argument('targetFile', type=str, location='files')
-        args = parser.parse_args()
+reconciliation_blueprint = Blueprint('reconciliation', __name__)
 
-        source_file = args['sourceFile']
-        target_file = args['targetFile']
+@reconciliation_blueprint.route('/v1/data-tool/reconciliation', methods=['POST'])
+def reconcile_files():
+    try:
+        source_file = request.files['sourceFile']
+        target_file = request.files['targetFile']
+        if source_file and target_file:
+            source_filename = secure_filename(source_file.filename)
+            target_filename = secure_filename(target_file.filename)
+            source_file.save(source_filename)
+            target_file.save(target_filename)
 
-        #reconciliation_service = ReconciliationService()
-        #reconciliation_report = reconciliation_service.generate_reconciliation_report(source_file, target_file)
+            reconciliation_service = ReconciliationService()
+            reconciliation_report = reconciliation_service.generate_reconciliation_report(source_filename, target_filename)
 
-        reconciliation_report = True
-        if reconciliation_report:
-            return {'reconciliation_report': "reconciliation_report"}, 200
+            return jsonify(reconciliation_report), 200
         else:
-            return {'error': 'An error occurred'}, 500
+            return jsonify({"message": "Files not provided"}), 400
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {str(e)}"}), 500

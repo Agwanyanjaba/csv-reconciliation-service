@@ -1,9 +1,12 @@
 from flask import Flask
-from app.controllers.reconciliation_controller import reconciliation_blueprint
+from flask_restful import Api
+from app.controllers.reconciliation_controller import ReconciliationResource
 
 app = Flask(__name__)
+api = Api(app)
 
-app.register_blueprint(reconciliation_blueprint)
+api.add_resource(ReconciliationResource, '/v1/data-tool/reconciliation')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8088)
+
